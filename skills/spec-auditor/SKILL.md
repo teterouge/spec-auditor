@@ -215,6 +215,8 @@ Category labels to use, in descending severity order:
 
 Only include categories that apply. If there are fewer than 3 meaningful priorities, list only those that exist — do not pad with low-severity notes.
 
+*Bottom line for the PM:* [2–3 sentences. Honest, direct executive summary of the spec's overall state. Name what it does well, name the single biggest structural gap, and give the PM a clear sense of how much work stands between this document and a sprint-ready spec. Tone: collegial, not condescending — you're the senior engineer who wants this to succeed.]
+
 ---
 
 ## Calibration Notes

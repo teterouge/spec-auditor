@@ -1,241 +1,197 @@
-  SPEC AUDIT REPORT                                                                                                                                                                                                                                Snake Game (MS-DOS Style / Nibbles Recreation)                                                                                                                                                                                                 
-  Audit date: 2026-03-10                                                                                                                                                                                                                         
-
-  ---
+● ---                                                                                                                                                                                                                                            
+  SPEC AUDIT REPORT     
+  Snake Game (MS-DOS Style) — Nibbles PRD                                                                                                                                                                                                        
+  Audit date: 2026-03-10                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+  ---                                                                                                                                                                                                                                            
   SPRINT READINESS VERDICT
 
-  🚫 Not ready — 2 blockers must be resolved. Sprint start not recommended.
+  ⚠️ Ready with fixes — 1 blocker and 5 warnings require PM response before sprint start. Core mechanics are well-defined, but edge case behaviors are listed without specified resolutions and success criteria are almost entirely untestable. 
 
-  Top blocker: Section 9 lists five edge cases to handle but specifies the required behavior for none of them — engineers will implement divergent solutions, and at least one (apple spawning with no empty spaces) risks an infinite loop in   
-  production.
+  Top blocker: Apple spawn exhaustion (edge case #2) is acknowledged but left completely unresolved — the game will exhibit undefined or broken behavior when the snake fills the grid.
 
   ---
   PASS 1: COMPLETENESS
 
-  ┌────────────────────┬───────────┬───────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐    
-  │       Field        │  Status   │ Severity  │                                                                                      Issue / Question                                                                                      │    
-  ├────────────────────┼───────────┼───────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Success metrics    │ ❌        │ 🔴        │ All 8 success criteria in Section 11 are qualitative and untestable (see Pass 2). QA cannot produce a deterministic pass/fail result for any of them. What does "runs smoothly without     │    
-  │                    │ Missing   │ Blocker   │ lag" mean in measurable terms?                                                                                                                                                             │    
-  ├────────────────────┼───────────┼───────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Edge case          │ ❌        │ 🔴        │ Section 9 lists 5 edge cases as "to handle" but specifies no expected behavior for any of them. Engineering will make 5 independent implementation decisions. What is the specified        │    
-  │ behaviors          │ Missing   │ Blocker   │ behavior for each?                                                                                                                                                                         │    
-  ├────────────────────┼───────────┼───────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Error states       │ ❌        │ 🟡        │ No error states defined. At minimum: what happens if localStorage is unavailable (private browsing, storage quota exceeded, security policy)? Does the game still run? Does the high score │    
-  │                    │ Missing   │ Warning   │  silently not persist?                                                                                                                                                                     │    
-  ├────────────────────┼───────────┼───────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Initial game state │ ❌        │ 🟡        │ Snake starting position, starting direction, and starting speed are not defined. Where does the snake start? Which direction is it moving at game start?                                   │    
-  │                    │ Missing   │ Warning   │                                                                                                                                                                                            │    
-  ├────────────────────┼───────────┼───────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Actor/device       │ ⚠️        │ 🔵 Note   │ Section 7.4 rules out mobile, but no minimum viewport/resolution is defined. The 40×25 grid needs a minimum screen size to render legibly.                                                 │    
-  │ context            │ Partial   │           │                                                                                                                                                                                            │    
-  ├────────────────────┼───────────┼───────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Build tooling      │ ❌        │ 🔵 Note   │ "React" is specified but no build tooling (Vite, CRA, etc.) or React version is mentioned. React 18 StrictMode double-invokes effects — this will cause a duplicate game loop with         │    
-  │                    │ Missing   │           │ setInterval unless explicitly handled.                                                                                                                                                     │    
-  └────────────────────┴───────────┴───────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘    
+  ┌────────────────────┬─────────────────────┬───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐    
+  │       Field        │       Status        │ Severity  │                                                                                 Issue / Question                                                                                 │    
+  ├────────────────────┼─────────────────────┼───────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
+  │ Problem statement  │ Missing             │ 🔵 Note   │ No user problem defined — spec goes straight to solution. Acceptable for an internal game build, but worth a one-liner.                                                          │    
+  ├────────────────────┼─────────────────────┼───────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
+  │ Success metrics    │ Vague/circular      │ 🟡        │ Section 11 lists acceptance criteria disguised as success metrics. None are measurable. QA will have no basis for sign-off. See Pass 2 for full breakdown.                       │    
+  │                    │                     │ Warning   │                                                                                                                                                                                  │    
+  ├────────────────────┼─────────────────────┼───────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
+  │ Edge case          │ Defined but         │ 🔴        │ Section 9 lists 5 edge cases but specifies handling for none of them. Engineers will invent independent solutions. Input handling in particular (items 1 and 5) is a core        │    
+  │ behaviors          │ unresolved          │ Blocker   │ gameplay mechanic decision that can't be left to individual judgment.                                                                                                            │    
+  ├────────────────────┼─────────────────────┼───────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
+  │ Error states       │ Missing             │ 🟡        │ No behavior specified for: localStorage unavailable (private browsing, quota exceeded), apple spawn with zero remaining empty cells, or game loop failure.                       │    
+  │                    │                     │ Warning   │                                                                                                                                                                                  │    
+  ├────────────────────┼─────────────────────┼───────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
+  │ Rollback / kill    │ N/A                 │ —         │ Static client-side app — not applicable.                                                                                                                                         │    
+  │ switch             │                     │           │                                                                                                                                                                                  │    
+  └────────────────────┴─────────────────────┴───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘    
 
   ---
   PASS 2: TESTABILITY
 
+  Success Criteria (Section 11) — 7 of 8 items are untestable as written.
+
   ---
-  Finding 1
-  - Location: Section 11, Success Criterion 1
+  - Location: Section 11, criterion 1
   - Original: "The game is playable from start to finish"
-  - Issue: No definition of what constitutes a valid "start to finish" playthrough. Not deterministic — QA cannot reproduce a pass/fail result.
-  - Rewritten: "A new game can be started from the Title screen, a snake of at least 5 segments can be grown by eating apples, and a Game Over screen is reached via wall or self-collision — all within a single uninterrupted session."        
+  - Issue: "Playable" is undefined. A game that crashes 50% of the time could technically be "playable."
+  - Rewritten: "A player can complete a full game session: Title → Playing (eating ≥1 apple) → Game Over → Restart → Playing, without errors or unresponsive states."
 
   ---
-  Finding 2
-  - Location: Section 11, Success Criterion 2
+  - Location: Section 11, criterion 2
   - Original: "All controls work as expected"
-  - Issue: "As expected" by whom? Against what specification? This is circular.
-  - Rewritten: "Arrow keys change snake direction per Section 3.2. Spacebar toggles Paused/Playing state. Enter key triggers a new game from the Game Over screen and navigates to the Title screen from the Title screen."
+  - Issue: "As expected" is circular — it references no defined behavior.
+  - Rewritten: "Arrow keys change snake direction per Section 3.2. Spacebar toggles Paused/Playing state. Enter transitions Title→Playing and GameOver→Title. No other keys affect game state."
 
   ---
-  Finding 3
-  - Location: Section 11, Success Criterion 7
-  - Original: "Game runs smoothly without lag or glitches"
-  - Issue: "Smoothly," "lag," and "glitches" are undefined. Also contradicts Section 7.3 which specifies 60fps — a game ticking 10 times per second has no visible frames between ticks, making 60fps a meaningless target for this architecture.
-  - Rewritten: "Game tick executes within ±5ms of the configured interval (default 100ms) as measured in Chrome DevTools Performance panel on a mid-range device. No frame is skipped during normal gameplay. The 60fps spec in Section 7.3
-  should be removed or replaced with a tick-accuracy metric."
+  - Location: Section 11, criterion 3
+  - Original: "Collision detection is accurate"
+  - Issue: No definition of accuracy. Accurate to the pixel? To the grid cell?
+  - Rewritten: "Game Over is triggered on the tick where the snake's head position (grid coordinates) matches any wall boundary cell or any occupied snake body cell. No false positives (game over without collision) or false negatives        
+  (collision without game over) occur in a 10-minute play session."
 
   ---
-  Finding 4
-  - Location: Section 11, Success Criterion 6
+  - Location: Section 11, criterion 6
   - Original: "Visual design matches MS-DOS aesthetic"
-  - Issue: Completely subjective. Two reviewers will disagree.
-  - Rewritten: "All visual elements use only the specified CGA/EGA colors from Section 5.1. Box-drawing characters are used for all borders per Section 5.3. All text is rendered in a monospace font. Snake segments use █ or equivalent block  
-  character. Apple uses ● or ◉."
+  - Issue: Purely subjective. QA cannot test this without a reference image or explicit checklist.
+  - Rewritten: "Visual design uses the color values in Section 5.1, box-drawing characters in Section 5.3, and Courier New (or equivalent monospace). A side-by-side comparison with the UI layout wireframe in Section 5.3 is the acceptance    
+  standard."
 
   ---
-  Finding 5
+  - Location: Section 11, criterion 7
+  - Original: "Game runs smoothly without lag or glitches"
+  - Issue: No performance threshold, hardware baseline, or definition of "glitch."
+  - Rewritten: "Game maintains a consistent 100ms tick interval (±10ms) for the duration of a session, measured in Chrome on a mid-range laptop (e.g., 4-core, 8GB RAM). No dropped frames observable to the naked eye during snake movement."
+
+  ---
   - Location: Section 3.2, Movement
   - Original: "Movement speed: approximately 10 tiles per second (adjust for playability)"
-  - Issue: "Approximately" and "adjust for playability" give developer complete discretion. QA cannot test against this.
-  - Rewritten: "Movement speed defaults to 100ms per tick (10 tiles/second). This value is a named constant (TICK_INTERVAL_MS) in the codebase. No runtime speed adjustment is in scope for MVP."
+  - Issue: "Approximately" and "adjust for playability" give no fixed target. Engineers will each pick a different number.
+  - Rewritten: "Default tick interval: 100ms (10 tiles/second). Speed is fixed for MVP — no in-game speed changes."
 
   ---
-  Finding 6
-  - Location: Section 3.3, Apple Appearance
-  - Original: "Apples should be visually distinct from the snake (different color/character)"
-  - Issue: "Should" and "visually distinct" are subjective. The spec already defines specific colors in Section 5.1 — this AC is redundant and weaker than the actual spec.
-  - Rewritten: "Apple is rendered using ● or ◉ in #FF0000. Snake segments are rendered in #00FF00. No snake segment or border character shares the apple's character or color."
-
-  ---
-  Finding 7
-  - Location: Section 7.3
-  - Original: "Optimize rendering to avoid unnecessary re-renders"
-  - Issue: "Unnecessary" is undefined. This is an implementation suggestion, not a testable requirement.
-  - Rewritten: Remove as an AC. If performance is a concern, specify: "The React component tree does not re-render components outside the GameBoard on each game tick, verified via React DevTools Profiler."
-
-  ---
-  Finding 8
-  - Location: Section 5.2
+  - Location: Section 5.2, Typography
   - Original: "All text should have the pixelated, retro feel"
-  - Issue: "Pixelated, retro feel" is subjective and untestable.
-  - Rewritten: "All text uses a CSS font-family stack of 'Courier New', Courier, monospace. No anti-aliasing CSS properties are applied to text elements. No serif or sans-serif fonts appear anywhere in the UI."
+  - Issue: Unmeasurable aesthetic outcome.
+  - Rewritten: "All text uses Courier New at sizes specified per UI element (see Section 5.3). No additional CSS effects (filters, shadows, transforms) are required for MVP."
 
   ---
   PASS 3: AMBIGUITY
 
   ---
-  Ambiguity 1
-  - Location: Section 9, Edge Case 1 — "Rapid key presses that might reverse direction through intermediate states"
-  - Ambiguity: Two standard implementations exist: (a) accept only the first direction change per tick, ignoring subsequent inputs until the tick fires; (b) queue the last valid direction input, processing one per tick. These produce        
-  observably different gameplay feel.
-  - Clarifying question: Should the input handler accept only one direction change per game tick (first wins), or should it queue the most recent valid direction change and apply it on the next tick?
+  - Location: Section 9, items 1 and 5
+  - Ambiguity: "Rapid key presses that might reverse direction" and "Multiple key presses during a single game tick" — two divergent implementations: (A) queue the last valid key press and apply it on the next tick, or (B) discard all but   
+  the most recent input per tick.
+  - Clarifying question: When two direction keys are pressed within the same 100ms tick, which input wins? Should the game maintain an input queue across ticks, or process only the last key received before each tick executes?
 
   ---
-  Ambiguity 2
-  - Location: Section 9, Edge Case 5 — "Multiple key presses during a single game tick"
-  - Ambiguity: This overlaps with Edge Case 1 but isn't identical. Could mean: holding a key vs. rapidly tapping. "Handle" is unspecified. Same two approaches apply, but the interaction with Edge Case 1 is unclear.
-  - Clarifying question: Is this a duplicate of Edge Case 1, or is there a distinct scenario (e.g., holding down a key triggers key-repeat events)? If distinct, what is the expected behavior?
+  - Location: Section 9, item 2
+  - Ambiguity: "Apple spawning when snake is very long (limited empty spaces)" — two interpretations: (A) the game gracefully handles this and continues, or (B) this is implicitly a win condition / edge case that can be deferred.
+  - Clarifying question: What is the expected behavior if the snake occupies all 1,000 grid cells and there is no valid spawn position for the apple? Does the player win, does the game freeze, or is this out of scope for MVP?
 
   ---
-  Ambiguity 3
-  - Location: Section 9, Edge Case 2 — "Apple spawning when snake is very long (limited empty spaces)"
-  - Ambiguity: Three possible behaviors: (a) loop until a free cell is found (infinite loop risk when snake fills >95% of grid), (b) pick a pre-computed list of free cells, (c) trigger a win condition if no empty space exists.
-  - Clarifying question: What is the expected behavior when no valid apple spawn position exists? Is there a win condition, or does the game continue without an apple?
+  - Location: Section 3.4, Collision Detection
+  - Ambiguity: "Snake head collides with any part of its own body" — the segment immediately behind the head moves away on the same tick the head advances. Some implementations allow this (neck is vacated before collision check); others     
+  treat it as a collision.
+  - Clarifying question: Is moving the snake's head into the cell previously occupied by segment 2 (the neck) a game-over collision?
 
   ---
-  Ambiguity 4
-  - Location: Section 6.2, Technical Requirements
-  - Original: "Recommended approach: Use setInterval or requestAnimationFrame for the game loop"
-  - Ambiguity: These two approaches have fundamentally different behavior when the browser tab is backgrounded. setInterval continues firing (game state advances while invisible). rAF pauses (game freezes while tab is hidden). Neither       
-  behavior is specified as correct.
-  - Clarifying question: Should the game pause automatically when the tab is backgrounded, or continue running?
-
-  ---
-  Ambiguity 5
   - Location: Section 4.1
-  - Original: "40 columns × 25 rows (adjustable for screen size considerations)"
-  - Ambiguity: Who adjusts this, under what conditions, and within what range? Two engineers will interpret this as either (a) a fixed constant they can tweak pre-launch, or (b) a responsive layout that recalculates at runtime.
-  - Clarifying question: Is the grid size a fixed build-time constant for MVP, or should it respond dynamically to viewport size? If responsive, what are the minimum and maximum dimensions?
+  - Ambiguity: "40 columns × 25 rows (adjustable for screen size considerations)" — "adjustable" could mean (A) fixed at 40×25 with CSS scaling, or (B) a responsive grid that recalculates tile count on viewport resize.
+  - Clarifying question: Is the grid always 40×25 tiles regardless of screen size (with CSS scaling the tile size), or should the grid dimensions change based on the viewport?
 
   ---
-  Ambiguity 6
-  - Location: Section 8 / Section 3.5
-  - Ambiguity: The localStorage key name for the high score is not specified. Two engineers or two future iterations could write to different keys, silently breaking persistence.
-  - Clarifying question: What is the exact localStorage key to use for the high score? (e.g., "snakeHighScore", "nibbles_high_score", etc.)
+  - Location: Section 5.1, Color Palette
+  - Ambiguity: "Blue or cyan" and "Light gray or white" have no hex values. "Bright green or lime" provides #00FF00 but the "or" implies optionality. Engineer will make an arbitrary color choice.
+  - Clarifying question: Should exact hex values be specified for all UI colors? At minimum, which should it be for boundaries: blue (#0000FF, #0000AA) or cyan (#00FFFF)?
 
   ---
-  Ambiguity 7
-  - Location: Section 5.3, Snake Rendering
-  - Original: "Snake head can optionally be distinguished from body segments"
-  - Ambiguity: "Optionally" means this is not a requirement. But it's in the spec under Visual Elements, implying it might be expected. Engineers will disagree on whether to implement it.
-  - Clarifying question: Is distinguishing the snake head from the body a requirement or explicitly out of scope for MVP? If in scope, what character or color distinguishes it?
+  - Location: Section 7.4 vs. Section 10
+  - Ambiguity: Section 7.4 says "Must work in modern browsers (Chrome, Firefox, Safari, Edge)." Section 10 says "No mobile support required for MVP." Mobile Safari is a modern browser. If someone opens the game on an iPhone, is broken       
+  rendering acceptable?
+  - Clarifying question: Is mobile Safari in scope for browser compatibility? If not, should the page display a "desktop only" message on mobile viewports?
 
   ---
   PASS 4: ASSUMPTIONS
 
   ---
-  - Assumption: localStorage is available and writable in the user's browser environment.
+  - Assumption: localStorage is available and writable in all target browser sessions.
   - Category: System behavior
-  - Action required: Document fallback behavior. The game must still be playable if localStorage throws. Confirm: is a silent no-op (no high score persists) acceptable, or should the user see an error?
+  - Action required: Confirm — specify fallback behavior. Private browsing on Safari throws a SecurityError on localStorage access. Minimum: wrap in try/catch and silently skip high score persistence. This needs to be an explicit decision,  
+  not left to the engineer.
 
   ---
-  - Assumption: The user's browser renders Unicode block characters (█, ●, ◉, ╔, ╝, etc.) correctly using the specified monospace font stack.
+  - Assumption: Arrow keys will be captured by the game and not intercepted by the browser (e.g., page scrolling).
   - Category: Platform
-  - Action required: Confirm. Misrendering of box-drawing characters is common on Windows with certain font fallbacks. Validate visually across Chrome, Firefox, Safari, Edge on both Windows and macOS.
+  - Action required: Document — event.preventDefault() on arrow key events is required to prevent page scroll. This is a known gotcha that should be called out explicitly rather than discovered in QA.
 
   ---
-  - Assumption: The viewport is large enough to display a 40×25 character grid at a legible size without scrolling.
+  - Assumption: The tab/window will remain focused during gameplay; background tab behavior is unspecified.
+  - Category: System behavior
+  - Action required: Confirm — setInterval degrades when the tab is backgrounded (Chrome throttles to ~1/second). requestAnimationFrame pauses entirely. The spec recommends both without distinguishing them. Should the game auto-pause when   
+  the tab loses focus? This is distinct from the Spacebar pause mechanic.
+
+  ---
+  - Assumption: Unicode box-drawing characters (╔, ═, ║, etc.) render consistently in the target font.
   - Category: Platform
-  - Action required: Define the minimum supported viewport width and height. Specify behavior if the viewport is too small (scale down? scroll? show a message?).
+  - Action required: Document — Courier New on Windows renders these correctly; on macOS the rendering varies. If cross-platform visual consistency matters, call out a specific fallback or use CSS borders instead.
 
   ---
-  - Assumption: React version is current enough to support all hooks used, but no specific version is pinned.
+  - Assumption: React version is unspecified; hooks availability assumed.
   - Category: System behavior
-  - Action required: Pin a minimum React version. If React 18, note that StrictMode double-invokes useEffect in development — a bare setInterval in useEffect will create two game loops. This needs an explicit cleanup return or a guard.      
-
-  ---
-  - Assumption: The snake always begins at a fixed or predictable position and direction at game start.
-  - Category: Sequence/state
-  - Action required: Add to spec: starting position (e.g., center of grid), starting direction (e.g., moving right), starting length (Section 3.2 says 3 — confirmed).
-
-  ---
-  - Assumption: There is no win condition. The game only ends via collision.
-  - Category: System behavior
-  - Action required: Confirm explicitly. Edge Case 2 (apple spawning with no room) suggests a scenario where the snake fills the board — is that a win? The spec doesn't say.
+  - Action required: Document — Pin to React 18+ (or minimum 16.8) in the tech stack section. This prevents an engineer from picking up an older project boilerplate.
 
   ---
   PASS 5: SCOPE RISKS
 
   ---
-  Risk 1
-  - Original: "approximately 10 tiles per second (adjust for playability)"
-  - Risk: Minimum: one hardcoded constant, never touched. Maximum: developer implements a tunable speed system, playtests multiple values, potentially adds difficulty ramping not in scope.
-  - Bounded rewrite: "Default tick interval is 100ms (10 tiles/second), defined as a single named constant TICK_INTERVAL_MS = 100. This value is not adjusted at runtime and not exposed as a user setting in MVP."
+  - Original: "Optimize rendering to avoid unnecessary re-renders" (Section 7.3)
+  - Risk: Minimum = don't do obviously wasteful full-page re-renders. Maximum = full profiling pass, React.memo everywhere, useMemo on every derived value, potential canvas migration.
+  - Bounded rewrite: "The game board component re-renders only when snake position, apple position, or score changes. No performance profiling or memoization beyond this is required for MVP."
 
   ---
-  Risk 2
-  - Original: "40 columns × 25 rows (adjustable for screen size considerations)"
-  - Risk: Minimum: fixed 40×25 grid, no responsive behavior. Maximum: fully responsive layout recalculating grid dimensions on resize, multiple breakpoints, CSS media queries.
-  - Bounded rewrite: "Grid is fixed at 40 columns × 25 rows for MVP. No responsive resizing is implemented. If the viewport is narrower than the minimum required width, the game renders at its fixed size and the page scrolls horizontally."  
+  - Original: "40 columns × 25 rows (adjustable for screen size considerations)" (Section 4.1)
+  - Risk: Minimum = fixed 40×25 with no adjustment. Maximum = fully responsive grid that recalculates dimensions on every resize event, with new collision boundaries and apple repositioning logic.
+  - Bounded rewrite: "Grid is fixed at 40×25 tiles. Tile size is fixed at [N]px. No responsive resizing logic required for MVP. On viewports smaller than the game's rendered width, the game may be partially clipped — no overflow handling    
+  required."
 
   ---
-  Risk 3
-  - Original: "Optimize rendering to avoid unnecessary re-renders"
-  - Risk: Minimum: no optimization, rely on React's default behavior. Maximum: full profiling session, canvas migration, virtualization of unchanged cells.
-  - Bounded rewrite: Remove from spec. If a rendering performance requirement exists, specify it measurably (e.g., "no re-render of components outside GameBoard on each tick, confirmed via React DevTools"). Otherwise, treat performance as a 
-  post-MVP concern.
+  - Original: "Use a monospace font that resembles MS-DOS system font" (Section 5.2)
+  - Risk: Minimum = Courier New, which ships with all target browsers. Maximum = loading a custom pixel/bitmap font (e.g., Perfect DOS VGA, Press Start 2P), adding a @font-face declaration, handling font load states.
+  - Bounded rewrite: "Use Courier New. No custom font loading is required. Do not use Google Fonts or any external font CDN for MVP."
 
   ---
-  Risk 4
-  - Original: "Must work in modern browsers (Chrome, Firefox, Safari, Edge)"
-  - Risk: Minimum: latest stable version of each. Maximum: N years of version support for all four browsers, including testing matrix.
-  - Bounded rewrite: "Must work in the current stable release of Chrome, Firefox, Safari, and Edge at time of delivery. No support for previous versions is required."
-
-  ---
-  Risk 5
-  - Original: "Optional: Brief instructions" (on Title Screen)
-  - Risk: Minimum: no instructions at all (it's optional). Maximum: full help screen with control diagram, rules explanation, and scoring guide.
-  - Bounded rewrite: Either remove "Optional: Brief instructions" entirely, or specify: "Title screen displays one line of control instructions: ARROW KEYS: Move  |  SPACE: Pause  |  ENTER: Start."
-
-  ---
-  Risk 6
-  - Original: "All text should have the pixelated, retro feel"
-  - Risk: Minimum: monospace font, done. Maximum: custom pixel/bitmap font loaded via @font-face, CSS image-rendering: pixelated, scanline overlay effects, CRT shader.
-  - Bounded rewrite: "All text uses font-family: 'Courier New', Courier, monospace. No custom font loading, CSS filter effects, or canvas post-processing is in scope for MVP."
+  - Original: "Implement a game loop that... Redraws the game screen" with "Recommended approach: Use setInterval or requestAnimationFrame" (Section 6.2)
+  - Risk: These two have fundamentally different behaviors: rAF pauses in background tabs; setInterval is throttled. Leaving the choice open means inconsistent behavior across environments and potential conflict with the 60fps target in     
+  Section 7.3.
+  - Bounded rewrite: "Implement the game loop using setInterval at a 100ms interval. Do not use requestAnimationFrame. The game does not need to maintain frame rate when the tab is backgrounded."
 
   ---
   SUMMARY
 
-  ┌────────────────┬───────┐
-  │    Severity    │ Count │
-  ├────────────────┼───────┤
-  │ 🔴 Blockers    │ 2     │
-  ├────────────────┼───────┤
-  │ 🟡 Warnings    │ 5     │
-  ├────────────────┼───────┤
-  │ 🔵 Notes       │ 3     │
-  ├────────────────┼───────┤
-  │ Total findings │ 10    │
-  └────────────────┴───────┘
+  - 🔴 Blockers: 1
+  - 🟡 Warnings: 5
+  - 🔵 Notes: 1
+  - Total findings: 19
 
-  Recommended next action: Before anything else, answer the five edge case behaviors in Section 9 — especially the input queue strategy (Edge Case 1/5) and the apple exhaustion scenario (Edge Case 2) — because those two will drive divergent 
-  architecture decisions on day one of the sprint.
+  Recommended next actions (ranked by severity):
 
-  ---
+  1. Structural — Resolve all Section 9 edge case behaviors before sprint start. The spec names 5 edge cases but specifies handling for zero of them. Input queuing behavior and apple spawn exhaustion are core mechanic decisions that
+  different engineers will implement incompatibly; these must be resolved, not left as implementation detail.
+  2. Sprint Risk — Rewrite Section 11 Success Criteria as testable acceptance criteria. 7 of 8 items are untestable as written. QA will have no objective basis for sprint sign-off, which means sign-off becomes a subjective negotiation at the
+   end of the sprint rather than a checklist.
+  3. Scope — Bound the grid sizing and rendering optimization requirements explicitly. "Adjustable for screen size" and "optimize rendering" are the two highest-risk scope-expansion phrases in the spec. Both need a ceiling added before the  
+  engineer starts, or they will either under-deliver or over-engineer.
+
+    ---
   Bottom line for the PM: This spec is well-structured and covers the happy path thoroughly. The visual design and out-of-scope sections are strong. What's missing is the behavior under failure/edge conditions and measurable done criteria.  
   Fix those two areas and this is ready.
+
+    ---
+  Bottom line for the PM: This is a strong architecture document and a useful team-alignment artifact. But it's not a PRD engineering can act on. The gap between "here are the services and tech stack" and "here is what done looks like for   
+  each feature" is where this spec currently lives. The three things that will unblock sprint start fastest: (1) a bounded MVP scope, (2) ACs for Phase 1 deliverables only, and (3) legal review of the voice cloning feature before a single   
+  line of that service is written.

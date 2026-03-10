@@ -1,318 +1,243 @@
-  SPEC AUDIT REPORT                                                                                                                                                                                                                              
-  CreatorPulse AI — MVP PRD                                                                                                                                                                                                                        Audit date: 2026-03-10                                                                                                                                                                                                                         
-                                                                                                                                                                                                                                                 
-  ---
-  SPRINT READINESS VERDICT
+● ---
+  SPEC AUDIT REPORT                                                                                                                                                                                                                                CreatorPulse AI MVP PRD
+  Audit date: 2026-03-10                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                                   ---                                                                                                                                                                                                                                            
+  SPRINT READINESS VERDICT                                                                                                                                                                                                                       
 
-  🚫 Not ready — 5 blockers must be resolved. Sprint start not recommended.
+  🚫 Not ready — 4 blockers must be resolved. The spec describes a compelling platform vision and a solid technical architecture, but it is not a PRD — it is an architecture document with personas attached. There are zero acceptance criteria
+   anywhere in the document, the MVP scope is undefined, and there is direct legal exposure from the voice cloning use cases that must be addressed before any engineering begins.
 
-  Top blocker: This document contains zero acceptance criteria — not a single testable behavioral requirement exists anywhere across 9 proposed microservices, making it impossible for QA to verify any deliverable or for engineering to know  
-  when they're done.
-
-  ---
-  A word before the passes: The opening paragraph claims this document is "sufficient for a developer fresh out of university to begin building the platform without further clarification." That claim is false and sets a dangerous
-  expectation. This document is an architecture overview and technology survey — it describes what components to build but almost never describes how those components should behave, for whom, under what conditions, or what constitutes done. 
-  Every finding below flows from that structural gap.
+  Top blocker: The spec contains no acceptance criteria. Engineering cannot determine when any feature is complete, and QA has no basis for sign-off on anything.
 
   ---
   PASS 1: COMPLETENESS
 
-  ┌─────────────────────────┬─────────────┬──────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐    
-  │          Field          │   Status    │ Severity │                                                                                   Issue / Question                                                                                   │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Acceptance criteria     │ ❌ Missing  │ 🔴       │ There are no ACs anywhere in this document. Zero. Endpoints are listed but no request/response behavior, no user-facing outcomes, no pass/fail conditions. QA cannot write a single  │    
-  │                         │             │ Blocker  │ test. Engineering cannot know when any feature is done.                                                                                                                              │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ MVP scope definition    │ ❌ Missing  │ 🔴       │ The title says "MVP PRD" but the document specifies 9+ microservices, custom LLM fine-tuning on A100 GPUs, voice cloning, video generation, multi-platform distribution, and a       │    
-  │                         │             │ Blocker  │ 12-month phased roadmap. What is actually in scope for the first shippable version? Which services are Phase 1? This is the question that blocks sprint planning entirely.           │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Error states            │ ❌ Missing  │ 🔴       │ No error states defined for any service. What happens when the LLM times out during script generation? When a distribution post to TikTok fails? When voice cloning audio is         │    
-  │                         │             │ Blocker  │ rejected as too short? When a Kafka consumer falls behind? For a distributed system of this complexity, undefined error behavior is a guarantee of inconsistent implementation.      │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Legal/consent           │ ❌ Missing  │ 🔴       │ Voice cloning of identified real people ("clones MrBeast + crew voices") is a live legal and regulatory issue touching biometric data law, right of publicity, and deepfake          │    
-  │ requirements            │             │ Blocker  │ legislation in multiple jurisdictions. This needs legal sign-off before any sprint involving voice cloning begins. No consent model is defined. No permitted-use boundary is drawn.  │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Edge cases              │ ❌ Missing  │ 🔴       │ No edge cases defined for any feature. Critical examples: voice cloning with <10 minutes of audio (the minimum is stated but the rejection behavior is not), apple-equivalent        │    
-  │                         │             │ Blocker  │ exhaustion scenarios for video rendering queues, distribution failures after partial publish (published to YouTube but not TikTok — what state is the post in?).                     │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Success metrics         │ ⚠️          │ 🟡       │ "Reduce research time by 75%" has no baseline measurement, no methodology, and no owner. "Produces publish-ready pieces with minimal human editing" — "minimal" is undefined and     │    
-  │                         │ Inadequate  │ Warning  │ unmeasurable. "Secure and scalable environment" is not a metric. What does success look like at 6 months post-launch?                                                                │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ User/actor definition + │ ⚠️          │ 🟡       │ Three marketing personas are described but the system's actual actors are  never defined. "RBAC via JWT claims" is specified but no roles are listed. Persona 1 invites "crew" to a   │
-  │  RBAC roles             │ Inadequate  │ Warning  │ team account — what can crew do vs. account owner? Are there admin roles? Read-only roles? Billing-only roles? Engineering will invent this without guidance.                        │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Monetisation Agent      │ ❌ Missing  │ 🟡       │ Persona 3 references a "Monetisation Agent" that "suggests Patreon tiers and sponsor outreach once downloads cross thresholds." This feature does not appear anywhere in Sections    │    
-  │                         │             │ Warning  │ 4–9. It is either a real service that needs specifying, or a persona embellishment that needs to be removed. Which is it?                                                            │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Social API compliance   │ ❌ Missing  │ 🟡       │ The spec ingests TikTok, YouTube, X, Reddit, and Instagram APIs. X/Twitter's API is severely rate-limited and expensive at scale. TikTok's business API is gated. Instagram's Graph  │    
-  │                         │             │ Warning  │ API restricts what can be read. None of this is addressed. What happens when an API is unavailable or returns a rate-limit error?                                                    │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Team collaboration      │ ❌ Missing  │ 🟡       │ Persona 1 ("Enterprise Creator") describes multi-user team workflows — writers tweak scripts, crew collaborate. The spec never defines how team collaboration works: can multiple    │    
-  │ model                   │             │ Warning  │ users edit the same project simultaneously? Is there version history? Conflict resolution? Locking?                                                                                  │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Out-of-scope definition │ ❌ Missing  │ 🔵 Note  │ No section defines what this platform explicitly does NOT do. Without this, scope will expand in every sprint planning meeting.                                                      │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ i18n architecture       │ ❌ Missing  │ 🔵 Note  │ Phase 7 lists "add languages" as a milestone but there is no i18n design in the frontend or backend spec. If string externalization and locale infrastructure aren't built in Phase  │    
-  │                         │             │          │ 1, Phase 7 becomes a rework, not an enhancement.                                                                                                                                     │    
-  ├─────────────────────────┼─────────────┼──────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-  │ Cloud provider          │ ❌ Missing  │ 🔵 Note  │ Section 9 lists "AWS/GCP/Azure" as production environment. This is three different infrastructure choices. Which one? IAM, networking, managed services, and cost models differ      │    
-  │                         │             │          │ significantly across providers.                                                                                                                                                      │    
-  └─────────────────────────┴─────────────┴──────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘    
+  ┌───────────────────────┬──────────────┬───────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐   
+  │         Field         │    Status    │ Severity  │                                                                                   Issue / Question                                                                                    │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   
+  │ Acceptance criteria   │ Missing      │ 🔴        │ Not a single AC exists in 156 lines. The introduction claims "The level of detail is sufficient for a developer fresh out of university to begin building the platform without        │   
+  │                       │ entirely     │ Blocker   │ further clarification" — this is demonstrably false. Engineering will build something, but whether it matches product intent is unknowable from this document.                        │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   
+  │ MVP scope definition  │ Missing      │ 🔴        │ The spec describes a 12-month, 7-phase platform. Phase 1 is "Foundation, User service, basic UI" — not a usable MVP definition. What is the minimum shippable product? Which features │   
+  │                       │              │ Blocker   │  must be present for the first user to get value?                                                                                                                                     │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   
+  │ Out-of-scope          │ Missing      │ 🔴        │ There is no list of what CreatorPulse does NOT do in v1. Given the feature surface (voice cloning, video generation, 6-platform distribution, ML training, RLHF), the absence of      │   
+  │ definition            │              │ Blocker   │ scope boundaries means engineering will make constant deferred-vs-MVP calls independently.                                                                                            │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   
+  │ Legal / compliance    │ Missing      │ 🔴        │ Persona 1 explicitly describes cloning MrBeast's voice and "crew voices." Voice cloning of public figures implicates right of publicity laws (enforceable in 35+ US states),          │   
+  │ coverage              │              │ Blocker   │ potential GDPR biometric data classification, and third-party platform ToS. None of this is acknowledged. See Pass 4 for full exposure.                                               │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   
+  │ User role taxonomy    │ Partial      │ 🟡        │ Section 6 specifies "RBAC via JWT claims" and Persona 1 mentions inviting "crew." But no role taxonomy exists — what roles are there? What can a free user do vs. Pro vs. Enterprise? │   
+  │                       │              │ Warning   │  What can a crew member do vs. an account owner? Engineers will invent a role model that may not match product intent.                                                                │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   
+  │ Success metrics       │ Vague        │ 🟡        │ "Reduce research time by 75%" has no baseline. 75% of what? Measured how? For which persona? Without a baseline this metric cannot be validated at launch.                            │   
+  │                       │              │ Warning   │                                                                                                                                                                                       │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   
+  │ Error states          │ Missing      │ 🟡        │ No error behavior is defined for any of the 9 backend services. What does the UI show when video rendering fails? When a social API token expires mid-schedule? When voice cloning    │   
+  │                       │              │ Warning   │ training fails to converge?                                                                                                                                                           │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   
+  │ Third-party API risk  │ Missing      │ 🟡        │ ElevenLabs, Runway, Pika, PlayHT, TikTok API, X API — none have rate limits, costs, fallback behaviors, or ToS constraints documented. These are not implementation details; they are │   
+  │ assessment            │              │ Warning   │  architectural constraints.                                                                                                                                                           │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Content moderation    │ Missing      │ 🟡        │ Section 8 mentions "Detoxify, filters" but no policy is defined. What content is prohibited? What happens when generated content fails moderation? Who reviews appeals? Can the       │   
+  │ policy                │              │ Warning   │ platform generate legal-but-potentially-harmful content?                                                                                                                              │   
+  ├───────────────────────┼──────────────┼───────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   
+  │ Data residency /      │ Missing      │ 🟡        │ Voice audio is biometric data in several jurisdictions (GDPR Article 9, Illinois BIPA, Texas CUBI). The spec mentions "Privacy: opt-in training, anonymisation" in one bullet but     │   
+  │ privacy               │              │ Warning   │ provides no GDPR/CCPA framework, no data retention policy, and no geographic scope.                                                                                                   │   
+  └───────────────────────┴──────────────┴───────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘   
 
   ---
   PASS 2: TESTABILITY
 
-  Since this spec contains no formal acceptance criteria, every behavioral statement in the document is assessed here.
+  The spec contains no formal acceptance criteria. The closest things to testable requirements are the three objectives in Section 1 and a handful of inline technical requirements. All are untestable as written.
 
   ---
-  Finding 1
   - Location: Section 1, Objective 1
-  - Original: "Provide real-time trend analytics and ideation tools that reduce research time by 75%"
-  - Issue: No baseline research time defined. No measurement methodology. "Real-time" has no latency threshold. QA cannot measure a 75% reduction against an unmeasured baseline.
-  - Rewritten: "Trend analytics dashboard displays trending topics within 5 minutes of detection. In usability testing with 20 target-persona users, median time-to-first-topic-selection is ≤8 minutes, compared to a baseline of [X minutes]   
-  established via pre-launch user research. [Note: baseline must be established before this criterion can be used.]"
+  - Original: "Provide real-time trend analytics and ideation tools that reduce research time by 75%."
+  - Issue: No baseline measurement defined. No methodology. No user cohort specified. Cannot be tested at any stage of development.
+  - Rewritten: "In usability testing with [N] creators across Free/Pro/Enterprise tiers: time from 'opening the platform with no topic in mind' to 'identifying ≥1 actionable content idea with supporting trend data' is ≤ [X] minutes. Baseline
+   (same task without CreatorPulse) is [Y] minutes, establishing the 75% target as [Y × 0.25] minutes."
 
   ---
-  Finding 2
   - Location: Section 1, Objective 2
-  - Original: "Offer AI-assisted content generation (text, audio, video) that produces publish-ready pieces with minimal human editing"
-  - Issue: "Minimal" is undefined and subjective. "Publish-ready" has no quality threshold. Unmeasurable as written.
-  - Rewritten: "AI-generated script drafts require ≤2 user editing sessions (defined as saves with changes) before the user marks the script as 'ready.' This is measured via product analytics on the first 500 scripts generated post-launch." 
+  - Original: "AI-assisted content generation that produces publish-ready pieces with minimal human editing."
+  - Issue: "Publish-ready" and "minimal" are both undefined. Two engineers reading this will implement entirely different quality bars.
+  - Rewritten: "AI-generated scripts are marked 'publish-ready' by the requesting creator after ≤ 2 rounds of edits, in ≥ 70% of test sessions across 20 creator participants. 'Rounds of edits' is defined as distinct save events on a script  
+  after initial generation."
 
   ---
-  Finding 3
-  - Location: Section 4.2 — Trend Ingestion
-  - Original: "Real-time alerts via WebSocket"
-  - Issue: "Real-time" is undefined. No latency SLA, no delivery guarantee, no behavior when WebSocket is disconnected.
-  - Rewritten: "Trend alerts are delivered via WebSocket within 30 seconds of a topic crossing the configured score threshold. If the client WebSocket connection is lost, alerts are queued server-side for up to 10 minutes and delivered on   
-  reconnect. Alerts older than 10 minutes at reconnect time are discarded."
+  - Location: Section 4.2, Trend Ingestion
+  - Original: "Real-time alerts via WebSocket."
+  - Issue: "Real-time" has no latency definition. This could mean 500ms or 5 minutes depending on who implements it.
+  - Rewritten: "Trend alerts are delivered to connected WebSocket clients within 60 seconds of a trend's score crossing the alert threshold, measured from ingestion event timestamp to client message event timestamp, under normal load (≤500  
+  concurrent users)."
 
   ---
-  Finding 4
-  - Location: Section 4.4 — Voice Synthesis
-  - Original: "Voice cloning via 10+ minutes of user audio"
-  - Issue: The 10-minute minimum is stated, but no output quality specification exists. What does "good enough" cloned voice mean? What happens with borderline audio (background noise, multiple speakers)? QA cannot accept or reject a voice  
-  clone without a quality bar.
-  - Rewritten: "Voice cloning accepts audio samples ≥10 minutes in duration, single-speaker, with a signal-to-noise ratio ≥20dB. The system rejects samples below these thresholds with a user-facing error: 'Audio quality too low for cloning —
-   please upload a cleaner recording.' Output quality is validated by [specify: MOS score threshold / blind listening test / SSIM metric]."
+  - Location: Section 4.4, Voice Synthesis
+  - Original: "Voice cloning via 10+ minutes of user audio."
+  - Issue: This is an input requirement for training, not an AC. There is no quality standard for the cloned voice output.
+  - Rewritten: "A cloned voice model, trained on ≥10 minutes of clean user audio (≤20dB background noise), produces synthesized speech rated ≥3.5/5.0 for 'sounds like the source speaker' by a panel of [N] independent listeners who have heard
+   the source audio. Rating methodology: [define blind test protocol]."
 
   ---
-  Finding 5
-  - Location: Section 4.6 — Distribution Service
-  - Original: "Workers handle retries/backoff"
-  - Issue: Retry count, backoff schedule, max-retry behavior, and dead-letter handling are all undefined. Two engineers will implement this completely differently.
-  - Rewritten: "Distribution workers retry failed posts up to 3 times with exponential backoff (30s, 2m, 10m). After 3 failures, the post is moved to a dead-letter state, the user receives an email notification ('Your post to [Platform]     
-  failed to publish'), and the post appears in the dashboard with status 'Failed — click to retry.'"
+  - Location: Section 7, CI/CD
+  - Original: "load (k6)" listed as a testing type.
+  - Issue: No load targets are defined anywhere. k6 tests without targets are meaningless — they generate numbers with no pass/fail criteria.
+  - Rewritten: "k6 load tests must pass the following thresholds before promotion to production: p95 response time ≤ 500ms for /v1/trends, /v1/generate/script; p99 ≤ 2000ms for /v1/voice/synthesize; error rate ≤ 0.1% at 500 concurrent       
+  users."
 
   ---
-  Finding 6
-  - Location: Section 4.8 — Notification Service
-  - Original: "Rate-limited, respects user prefs"
-  - Issue: Rate limits are unspecified. "User prefs" are not defined anywhere in the spec. QA cannot test either.
-  - Rewritten: "Notifications are capped at 10 per user per 24-hour window across all channels. Users can disable email, push, or both independently via Settings > Notifications. A user with all notifications disabled receives no
-  notifications of any kind, including system alerts. [Note: notification preference schema must be defined before implementation.]"
-
-  ---
-  Finding 7
-  - Location: Section 5 — Frontend
-  - Original: "Responsive PWA, dark/light themes, skeleton loaders, optimistic updates, client-side validation"
-  - Issue: Five separate requirements bundled in one line, none with testable specifications. "Responsive" has no breakpoints. "PWA" has no offline capability spec. "Optimistic updates" has no rollback behavior.
-  - Rewritten: Each of these five items needs a separate AC. At minimum: "The application renders without horizontal scrolling at viewport widths ≥375px (iPhone SE). Dark/light theme toggle is present in Settings and persists across sessions
-   via localStorage. Skeleton loaders appear within 100ms of a data fetch initiating and are replaced by content or an error state within [N] seconds."
-
-  ---
-  Finding 8
-  - Location: Section 7 — CI/CD
-  - Original: "Rollbacks automated"
-  - Issue: Automated rollback trigger conditions are unspecified. Rollback to which state? What triggers rollback — failed health checks? Error rate threshold? Manual approval?
-  - Rewritten: "Argo CD triggers an automated rollback to the previous Helm release if the deployment's error rate exceeds 5% within 5 minutes of rollout completion, as measured by the http_requests_total{status=~'5..'} Prometheus metric.   
-  Rollback completes within 3 minutes. On-call engineer is paged via PagerDuty upon rollback initiation."
+  - Location: Section 12, all three personas
+  - Original: Entire persona workflow narratives (e.g., "Trend Agent surfaces 'challenge' formats spiking on YouTube/TikTok")
+  - Issue: Personas describe happy-path workflows with no acceptance criteria. "Trend Agent surfaces X" — how does a developer know the Trend Agent is working? What constitutes "spiking"? What's the threshold?
+  - Rewritten: Each persona step needs a corresponding AC. Example for Persona 1, Step 1: "Given the user navigates to the Trends dashboard, when at least one ingested trend has a burst score > [threshold] in the past 24 hours, then the     
+  dashboard displays that trend in the 'Spiking' category within the user's selected content verticals."
 
   ---
   PASS 3: AMBIGUITY
 
   ---
-  Ambiguity 1
-  - Location: Section 4.3 — Content Generation
-  - Original: "LLMs: Mistral, LLaMA2, GPT-J"
-  - Ambiguity: Three different models listed with no selection criteria. Are they alternatives (pick one), fallbacks (try in order), or used for different tasks (e.g., GPT-J for summaries, Mistral for scripts)? Engineers will make
-  independent choices.
-  - Clarifying question: Which model is the primary for each generation endpoint (/script, /summary, /ideas)? Under what conditions is a different model used? Who makes the call if one model underperforms?
+  - Location: Document title and Section 10 roadmap
+  - Ambiguity: The document is titled "MVP PRD" but describes a 12-month, 7-phase platform. Two engineers reading this will disagree on: (A) MVP = Phase 1 only, or (B) MVP = the complete platform as described. Phase 1 is described in one    
+  bullet as "Foundation, User service, basic UI" — this is not a product definition.
+  - Clarifying question: What is the single version of CreatorPulse that could be shipped to 10 real users to validate the core value proposition? Which features are in it, which are not?
 
   ---
-  Ambiguity 2
-  - Location: Section 2.2 / Section 4.4
-  - Original: "Actix Web or Axum" / "ElevenLabs, PlayHT" / "Tacotron2, FastSpeech2 or third-party APIs" / "Redux/Zustand"
-  - Ambiguity: Four separate "A or B" choices left open. Each pair represents significantly different implementation approaches. Without decisions, engineers will diverge, or spend sprint time in framework debates.
-  - Clarifying question: Who makes the final technology selections for each of these pairs, and by when? These must be resolved before development begins on any service that depends on them.
+  - Location: Section 6; Section 12, Persona 1
+  - Ambiguity: "RBAC via JWT claims" is specified but no role taxonomy exists. Persona 1 mentions inviting "crew." Does a crew member have access to all projects? Can they publish? Can they clone voices? Can they view billing?
+  - Clarifying question: What are the specific roles in the system (e.g., Owner, Admin, Editor, Viewer), and what permissions does each role have per feature area?
 
   ---
-  Ambiguity 3
-  - Location: Persona 1 (Enterprise) vs. Section 4.6 (Distribution)
-  - Original: Persona 1 references "A/B tested thumbnails" as a Distribution Agent capability.
-  - Ambiguity: Thumbnail generation and A/B testing are not mentioned anywhere in the Distribution Service spec (Section 4.6) or the Video Service spec (Section 4.5). Is this a real feature or persona embellishment? If real, which service   
-  owns it, and what does A/B testing mean in this context (two uploads? automated variant selection? manual selection with analytics)?
-  - Clarifying question: Is thumbnail A/B testing in scope for MVP? If yes, which service owns it and what is the test mechanism?
+  - Location: Section 4.3
+  - Ambiguity: "LLMs: Mistral, LLaMA2, GPT-J" — are all three deployed simultaneously? Is one the default? Can users choose? GPT-J is now several model generations outdated. Two engineers will implement this as (A) one model with others as  
+  fallbacks, (B) user-selectable dropdown, or (C) parallel ensemble.
+  - Clarifying question: For MVP, which single LLM is used for script generation? Is model selection a user-facing feature or an implementation detail?
 
   ---
-  Ambiguity 4
-  - Location: Persona 3 vs. Section 4.6
-  - Original: "Distribution Agent publishes full audio to RSS feeds (Spotify, Apple)"
-  - Ambiguity: Section 4.6 lists OAuth2 integrations for YouTube, TikTok, Facebook, Spotify — but not Apple Podcasts. Apple Podcasts uses RSS submission, not OAuth. Is Apple Podcasts/RSS distribution in scope? It requires a different        
-  integration pattern entirely.
-  - Clarifying question: Is Apple Podcasts RSS distribution in scope for MVP? If yes, how does the RSS feed get generated and hosted, and which service owns it?
+  - Location: Section 4.4 and Section 12, Personas 1 and 3
+  - Ambiguity: Persona 1: "clones MrBeast + crew voices." Persona 3: "clones AJ's voice from 10 mins of training audio." It is unclear whether voice cloning is (A) self-cloning only (user clones their own voice), or (B) any-voice cloning    
+  (user can clone any voice from any audio). These are fundamentally different products with different legal, ethical, and technical requirements.
+  - Clarifying question: Is voice cloning in CreatorPulse restricted to the authenticated user's own voice, or can users submit any audio for cloning? If not self-only, what is the consent mechanism?
 
   ---
-  Ambiguity 5
-  - Location: Section 4.2 — Trend Ingestion
-  - Original: "Ingest TikTok, YouTube, X, Reddit, Instagram APIs" vs. Persona 1 "spiking on YouTube/TikTok" vs. Persona 2 "AU/NZ region"
-  - Ambiguity: Are all five platforms surfaced to all users, or is this configurable per user/plan? Does the regional filter (AU/NZ in Persona 2) imply geographic filtering is a feature? If so, which platforms support geographic trend       
-  filtering via their APIs?
-  - Clarifying question: Can users configure which platforms to monitor? Is geographic trend filtering a feature, and if so, which platforms support it?
+  - Location: Section 4.4
+  - Ambiguity: "Models: Tacotron2, FastSpeech2 or third-party APIs (ElevenLabs, PlayHT)" — "or" with no decision criteria. Two interpretations: (A) build proprietary models first, use third-party as fallback, or (B) use third-party APIs     
+  exclusively for MVP and defer proprietary training.
+  - Clarifying question: For MVP, is voice synthesis powered by self-hosted models or third-party APIs? Who absorbs the per-synthesis API cost?
 
   ---
-  Ambiguity 6
-  - Location: Section 8 — ML & LLM Design
-  - Original: "Content moderation pipeline (Detoxify, filters)"
-  - Ambiguity: What happens when content is flagged? Three possible outcomes: (a) content is blocked and user is notified, (b) content is flagged for human review but still delivered to user, (c) content is silently modified. These produce  
-  completely different user experiences.
-  - Clarifying question: When the moderation pipeline flags generated content, what is the exact user-facing behavior? Is flagged content ever surfaced to the user, and in what form?
+  - Location: Section 12, Persona 3
+  - Ambiguity: "Monetisation Agent suggests Patreon tiers and sponsor outreach once downloads cross thresholds." This agent is not listed in any of the 9 backend services (Sections 4.1–4.9). Either it's a missing service specification or    
+  it's illustrative narrative that should not be implemented.
+  - Clarifying question: Is the Monetisation Agent a required MVP feature? If so, where is its service spec?
 
   ---
-  Ambiguity 7
-  - Location: Section 6 — Auth
-  - Original: "RBAC via JWT claims"
-  - Ambiguity: No roles are defined. The spec mentions Enterprise plan with "team account" and "crew," Pro plan, and Free plan (Persona 3). Are plan tiers equivalent to roles? Are there sub-roles within a team (owner, editor, viewer)?       
-  Engineers will invent a role model without guidance.
-  - Clarifying question: What are the named roles in the RBAC system? What permissions does each role grant or deny, specifically for project editing, billing access, distribution authorization, and analytics viewing?
+  - Location: Section 12, Persona 1
+  - Ambiguity: "Distribution Agent publishes to YouTube, TikTok, Instagram with A/B tested thumbnails." A/B thumbnail testing is not mentioned in the Distribution Service spec (Section 4.6). This implies either a missing feature or a        
+  narrative flourish.
+  - Clarifying question: Is A/B thumbnail testing in scope for MVP? If so, what is the test mechanism — manual variant upload, AI-generated variants, or integration with YouTube's native A/B feature?
 
   ---
-  Ambiguity 8
-  - Location: Section 10 — Roadmap, Phase 1
-  - Original: "Phase 1 (0–2m): Foundation, User service, basic UI"
-  - Ambiguity: "Basic UI" is undefined against a frontend spec that includes 8+ pages (Landing, Dashboard, Project Workspace with 6 sub-sections, Settings, Help). Which pages are in scope for Phase 1? "Foundation" is undefined — does it     
-  include Kafka setup, all three databases, and Kubernetes infrastructure, or is this a local docker-compose phase?
-  - Clarifying question: What is the explicit deliverable list for Phase 1 that an engineer can use to call it done?
+  - Location: Section 4.2
+  - Ambiguity: "Ingest TikTok, YouTube, X, Reddit, Instagram APIs" — the spec treats these as equivalent data sources. In practice, X's API is paid ($100/month+ for basic access), TikTok's Research API requires application approval
+  (weeks-long process), and Instagram's Graph API has significant restrictions on public data. Two engineers will either (A) assume all are immediately available, or (B) independently discover access constraints and make unilateral descoping
+   decisions.
+  - Clarifying question: Has API access been confirmed for all five platforms? Which platforms are required for MVP vs. nice-to-have?
 
   ---
   PASS 4: ASSUMPTIONS
 
   ---
-  - Assumption: Social platform APIs (TikTok, YouTube, X/Twitter, Instagram, Reddit) grant API access at the volume and data scope required.
+  - Assumption: This spec assumes cloning the voices of named public figures (e.g., MrBeast) is a permitted and legal use of the voice cloning feature.
+  - Category: System behavior / Legal
+  - Action required: Confirm — this requires legal review before any engineering begins. Right of publicity is enforceable in 35+ US states. California's AB 1836 (2024) specifically addresses AI-generated replicas of public figures. GDPR    
+  classifies voice as biometric data (Article 9 special category) in several EU interpretations. ElevenLabs' ToS explicitly prohibits cloning public figures without consent. This assumption may make the described use case unshippable as     
+  designed.
+
+  ---
+  - Assumption: This spec assumes TikTok, X (Twitter), Reddit, YouTube, and Instagram APIs are accessible at the ingestion volume required for real-time trend detection.
   - Category: Third-party
-  - Action required: Confirm. X/Twitter API costs $100/month (Basic) to $42,000/month (Enterprise) depending on volume. TikTok's Research API is application-gated. Instagram's Graph API restricts non-business accounts. API access agreements 
-  and cost modeling must be completed before trend ingestion sprint begins.
+  - Action required: Confirm before engineering begins. X (Twitter) API now requires paid access starting at $100/month (basic) with severe rate limits. TikTok Research API requires approval and is restricted to qualified researchers.       
+  Instagram's public data API is extremely limited. Reddit's API has been significantly restricted since 2023. These constraints could eliminate 3 of the 5 data sources before a line of code is written.
 
   ---
-  - Assumption: Voice cloning of real, identifiable third parties (specifically named in Persona 1: "MrBeast + crew voices") is legally permissible under the platform's terms of service and applicable law.
-  - Category: System/legal
-  - Action required: Confirm with legal counsel before any voice cloning sprint. Biometric data law (Illinois BIPA, Texas CUBI, EU GDPR Article 9), right of publicity statutes, and emerging deepfake legislation in multiple US states and the 
-  EU directly apply. The platform must define: (a) whose voice can be cloned, (b) what consent is required, (c) what use restrictions apply to cloned voices.
+  - Assumption: This spec assumes A100 GPU access is available for LLM fine-tuning (LoRA/QLoRA, Section 4.3).
+  - Category: System behavior / Infrastructure
+  - Action required: Document — A100 GPU instances (e.g., AWS p4d.24xlarge) cost $32/hour on-demand. Fine-tuning runs for named models can take 10-100+ hours. This is a significant budget assumption that should be explicitly acknowledged and
+   approved, not buried in a technical spec bullet.
 
   ---
-  - Assumption: A100 GPUs are available for LLM fine-tuning via LoRA/QLoRA.
+  - Assumption: This spec assumes ElevenLabs, PlayHT, Runway, and Pika are viable commercial dependencies with acceptable costs, rate limits, and content policies for the described use cases.
   - Category: Third-party
-  - Action required: Confirm provider, cost model, and availability before ML sprint begins. A100 cloud instances cost $3–$6/hour per GPU. Fine-tuning runs referenced in the spec could require multi-day runs on multi-GPU clusters. This must 
-  be budgeted and provisioned, not discovered during sprint.
+  - Action required: Confirm — each of these services has per-character/per-second/per-generation pricing that accumulates rapidly at scale. None have been cost-modeled. ElevenLabs has explicit policies against cloning public figures. Runway
+   and Pika have content moderation policies that may conflict with some described use cases (e.g., AI-generated b-roll of real people).
 
   ---
-  - Assumption: Runway ML, Pika, and Stable Video Diffusion APIs are accessible at the throughput required for production video generation.
-  - Category: Third-party
-  - Action required: Confirm. Runway ML charges per second of generated video and has rate limits. Pika is in limited API access. SDV is self-hosted — infrastructure requirements must be specified. At minimum, pricing models and rate limits 
-  must be in the spec before the video sprint begins.
+  - Assumption: This spec assumes voice audio uploaded for cloning is not subject to GDPR's biometric data provisions or US state biometric privacy laws (BIPA, CUBI, TDPSA).
+  - Category: Third-party / Legal
+  - Action required: Confirm — Illinois BIPA has resulted in class-action settlements exceeding $100M for voice/facial data. Texas and Washington have similar laws. If any users are in these jurisdictions, explicit informed consent and a    
+  defined data retention/deletion policy are required before launch.
 
   ---
-  - Assumption: The platform can process, store, and use voice recordings as training data under a valid legal basis under GDPR/CCPA.
-  - Category: System/legal
-  - Action required: Confirm. Voice data is biometric under GDPR and several US state laws. "Opt-in training, anonymisation" (Section 8) is mentioned but not specified. A data processing addendum, privacy policy update, and specific consent 
-  flow must be designed before voice cloning ships.
+  - Assumption: This spec assumes the Monetisation Agent (Persona 3) and A/B thumbnail testing (Persona 1) are implemented features, though neither appears in any service specification.
+  - Category: Sequence / Structural
+  - Action required: Confirm — either add service specs or explicitly mark these as post-MVP narrative. If a developer reads Persona 3 before reading the service specs, they may begin scoping and designing a Monetisation Agent service that  
+  was never formally required.
 
   ---
-  - Assumption: The team has operational maturity to run PostgreSQL + MongoDB + Redis + Kafka + Kubernetes + Prometheus/Grafana/Loki/Jaeger simultaneously from Phase 1.
-  - Category: System
-  - Action required: Confirm. This is a significant infrastructure footprint. If the team is early-stage, managed services (RDS, Atlas, Upstash, MSK) should be specified explicitly rather than implying self-managed clusters.
-
-  ---
-  - Assumption: "Monetisation Agent" (Persona 3) is a real planned feature.
-  - Category: Data
-  - Action required: Confirm. If real, add a Section 4.10 specifying what the Monetisation Agent does, which service owns it, what data it analyzes, and what outputs it produces. If it's a persona embellishment, remove it from Persona 3 to  
-  avoid engineering building toward a non-requirement.
-
-  ---
-  - Assumption: i18n/l10n infrastructure does not need to be built in Phase 1, despite Phase 7 listing "add languages" as a milestone.
-  - Category: Sequence/state
-  - Action required: Document. String externalization, locale routing, RTL support, and date/number formatting must be designed into the system from the start or Phase 7 becomes a costly rework. Confirm whether i18n scaffolding is in Phase 1
-   scope.
+  - Assumption: This spec assumes RSS feed distribution to Spotify and Apple Podcasts (Persona 3) is handled by the Distribution Service (Section 4.6), which does not mention RSS at all.
+  - Category: System behavior
+  - Action required: Document — Spotify and Apple Podcasts distribution via RSS requires: a publicly accessible RSS feed endpoint, podcast-specific XML formatting (iTunes tags), initial submission/approval by each platform (Apple Podcasts   
+  review takes 3-5 days), and ongoing compliance with each platform's content policies. None of this is in scope in Section 4.6.
 
   ---
   PASS 5: SCOPE CREEP RISKS
 
   ---
-  Risk 1
-  - Original: "The level of detail is sufficient for a developer fresh out of university to begin building the platform without further clarification"
-  - Risk: Minimum: ignored as marketing copy. Maximum: junior engineers take this literally, skip discovery, and make hundreds of unbounded implementation decisions the spec left open. This single sentence is the highest-risk phrase in the  
-  document.
-  - Bounded rewrite: Remove entirely. Replace with: "This document defines the target architecture and feature set. Before sprint planning, each phase's deliverables must be decomposed into user stories with acceptance criteria. Engineering 
-  kickoff is required before Phase 1 begins."
+  - Original: "The level of detail is sufficient for a developer fresh out of university to begin building the platform without further clarification." (Introduction)
+  - Risk: This statement will be read as authorization to implement everything described without scoping conversations. A junior developer will take the entire 12-month roadmap as the immediate backlog.
+  - Bounded rewrite: Remove this statement entirely. Replace with: "This document describes the full CreatorPulse platform vision. MVP scope is defined in [Section X — to be added]. Engineering should implement only MVP scope in the initial 
+  sprint cycle."
 
   ---
-  Risk 2
-  - Original: "Bias mitigation"
-  - Risk: Minimum: plug in a pre-built filter (Detoxify) and ship. Maximum: full bias audit pipeline, red-teaming, demographic disparity testing, ongoing human review workflow, quarterly bias reports.
-  - Bounded rewrite: "For MVP, content moderation uses Detoxify's toxicity classifier with a threshold of [X]. Content scoring above the threshold is blocked and the user sees: 'This content was flagged and cannot be generated. Try
-  rephrasing your prompt.' No human review queue is built for MVP. Post-launch bias audit is scheduled for [date]."
+  - Original: "Ingest TikTok, YouTube, X, Reddit, Instagram APIs." (Section 4.2)
+  - Risk: Minimum = 1 platform integration. Maximum = 5 separate integrations with different auth models, rate limits, data schemas, and legal agreements — each is 2-4 weeks of integration work.
+  - Bounded rewrite: "For MVP: ingest [Platform A] and [Platform B] only. Integration with [C, D, E] is deferred to Phase 2. Selection criteria: platforms with confirmed API access and highest overlap with target creator persona."
 
   ---
-  Risk 3
-  - Original: "Continuous improvement (RLHF)"
-  - Risk: Minimum: collect thumbs-up/thumbs-down on generated content for future use. Maximum: full RLHF training pipeline with preference labeling infrastructure, reward model training, PPO fine-tuning loop, and human labeler workflows.    
-  - Bounded rewrite: "For MVP, user feedback (thumbs up/down per generation) is logged to MongoDB for future use. No RLHF training pipeline is built. RLHF infrastructure is a Phase 6+ item."
+  - Original: "Continuous improvement (RLHF)." (Section 8)
+  - Risk: Minimum = a conceptual note that RLHF is planned. Maximum = a fully operational human feedback collection UI, labeling workforce, training pipeline, model deployment workflow, and regression testing suite — a 3-6 month engineering 
+  effort on its own.
+  - Bounded rewrite: "RLHF is post-MVP. For MVP: content generation uses base fine-tuned models without feedback loops. RLHF infrastructure design is deferred to Phase 5+."
 
   ---
-  Risk 4
-  - Original: "Responsive PWA"
-  - Risk: Minimum: the app renders on mobile without horizontal scroll. Maximum: full offline support via service workers, installable via Add to Home Screen, background sync for draft saves, push notifications, app shell caching.
-  - Bounded rewrite: "For MVP: the application renders without horizontal scrolling at viewport widths ≥375px. It is not installable as a PWA and does not support offline use. Service worker and offline capability are Phase 4+ items."       
+  - Original: "multi-AZ, auto-scaling, backups, WAF/DDOS" for all deployment environments (Section 9)
+  - Risk: Minimum = production-ready infrastructure described as an MVP requirement. Maximum = full AWS/GCP/Azure HA setup with WAF configuration, DDoS mitigation, cross-region failover — 4-8 weeks of DevOps work before the first feature    
+  ships.
+  - Bounded rewrite: "MVP deployment target: single-AZ, single-region on [AWS/GCP]. Auto-scaling, multi-AZ, WAF, and DDoS mitigation are Phase 2 infrastructure. Local and staging environments use docker-compose as specified."
 
   ---
-  Risk 5
-  - Original: "Secure and scalable environment" (Objective 3, Section 1)
-  - Risk: Minimum: HTTPS and auth. Maximum: SOC 2 Type II certification, annual penetration testing, bug bounty program, WAF rule tuning, DDoS runbook, security incident response plan.
-  - Bounded rewrite: "For MVP security baseline: HTTPS enforced, Argon2id password hashing, JWT with refresh token revocation, Redis rate limiting (define: N req/min per endpoint), CSRF protection, input sanitization via sqlx. SOC 2 and     
-  penetration testing are post-GA items."
-
-  ---
-  Risk 6
-  - Original: "Integrate with the existing system" (implied throughout — "the existing API," "existing auth system")
-  - Risk: No "existing system" is defined. Every service is being built from scratch, meaning "integration" phrases are ambiguous references to components being built in parallel. Two teams building in parallel will make incompatible        
-  interface assumptions.
-  - Bounded rewrite: For each inter-service dependency, define the API contract (request schema, response schema, error codes) before either service begins implementation. Add a contract-first design step to Phase 1."
-
-  ---
-  Risk 7
-  - Original: "Workers handle retries/backoff" (Section 4.6, Distribution)
-  - Risk: Minimum: one retry, fixed 30s delay. Maximum: per-platform retry policies, circuit breakers, dead-letter queue UI, admin retry tooling, alerting, SLA dashboards.
-  - Bounded rewrite: See Pass 2, Finding 5 — rewritten there with explicit retry count, backoff schedule, dead-letter behavior, and user notification copy.
+  - Original: "Bias mitigation. Content moderation pipeline (Detoxify, filters). Human-in-loop editing. Continuous improvement (RLHF). Privacy: opt-in training, anonymisation." (Section 8)
+  - Risk: Each of these is a significant engineering workload. Listed as bullet points in an ML section, they appear lightweight. In practice: a content moderation pipeline with human-in-loop escalation is a full product feature (queue      
+  management, reviewer UI, SLA tracking, appeal flows).
+  - Bounded rewrite: "For MVP: content moderation uses Detoxify inference as a pre-publish filter only. Generated content scoring below [threshold] is blocked with a user-visible error. No human-in-loop workflow, no appeal process, and no   
+  RLHF loop for MVP. These are Phase 4+ features."
 
   ---
   SUMMARY
 
-  ┌────────────────┬───────┐
-  │    Severity    │ Count │
-  ├────────────────┼───────┤
-  │ 🔴 Blockers    │ 5     │
-  ├────────────────┼───────┤
-  │ 🟡 Warnings    │ 8     │
-  ├────────────────┼───────┤
-  │ 🔵 Notes       │ 4     │
-  ├────────────────┼───────┤
-  │ Total findings │ 17    │
-  └────────────────┴───────┘
+  - 🔴 Blockers: 4
+  - 🟡 Warnings: 8
+  - 🔵 Notes: 3
+  - Total findings: 31
 
-  Recommended next action: Before any other fix, define what is actually in scope for the MVP — pick a single user journey (e.g., Persona 3's solo podcaster flow), enumerate the minimal services required to support it end-to-end, and write  
-  acceptance criteria for just those services. Everything else is future phases. Without a bounded MVP definition, this spec will generate scope debates in every sprint planning session for 12 months.
+  Recommended next actions (ranked by severity):
 
-  ---
-  Bottom line for the PM: This is a strong architecture document and a useful team-alignment artifact. But it's not a PRD engineering can act on. The gap between "here are the services and tech stack" and "here is what done looks like for   
-  each feature" is where this spec currently lives. The three things that will unblock sprint start fastest: (1) a bounded MVP scope, (2) ACs for Phase 1 deliverables only, and (3) legal review of the voice cloning feature before a single   
-  line of that service is written.
+  1. Legal / Compliance: Resolve voice cloning scope and legal exposure before any engineering begins — Persona 1's description of cloning public figures' voices (MrBeast, crew) implicates right of publicity law in 35+ US states, GDPR       
+  biometric data provisions, and ElevenLabs' own ToS, any of which could make the feature as described unshippable. A one-paragraph legal review decision (self-voice only vs. any-voice, with required consent mechanism) would unblock this.   
+  2. Structural: The spec has zero acceptance criteria — add ACs for the MVP feature set before sprint start. Without them, engineering cannot determine when any feature is complete, QA has no sign-off criteria, and the sprint has no        
+  definition of done. This is the single most common reason well-architected products fail QA and miss launch windows.
+  3. Structural: Define the MVP scope explicitly as a named, bounded subset of the described platform. The current Phase 1 definition ("Foundation, User service, basic UI") is not a product — it is infrastructure. Identify the minimum       
+  feature set that delivers value to one target persona, and explicitly exclude everything else from the initial sprint cycle.
+  4. Sprint Risk: Confirm API access for TikTok, X, and Instagram before the Trend Ingestion Service is scoped — if 3 of 5 data sources are inaccessible or cost-prohibitive, the core value proposition of the platform changes materially and  
+  the architecture of Section 4.2 may need to be redesigned before engineering starts.
