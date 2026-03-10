@@ -2,17 +2,10 @@
   "name": "spec-auditor",
   "version": "1.0.0",
   "description": "Adversarially audits product specs, PRDs, and feature briefs before they reach engineering.",
-  "skills": [
-    {
-      "name": "spec-auditor",
-      "path": "SKILL.md"
-    }
-  ],
-  "scripts": [
-    {
-      "name": "spec_parser",
-      "path": "scripts/spec_parser.py",
-      "description": "Extracts structured elements from uploaded spec files for audit processing"
-    }
-  ]
+  "author": {
+    "name": "teterouge"
+  },
+  "repository": "https://github.com/teterouge/spec-auditor",
+  "license": "MIT",
+  "keywords": ["specs", "prd", "product", "audit", "requirements"]
 }
