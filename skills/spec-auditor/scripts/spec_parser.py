@@ -160,6 +160,16 @@ ASSUMPTION_PATTERNS = [
     (r'\b(the\s+(existing|current)\s+(api|service|system|database|endpoint))\b', 'integration assumption'),
 ]
 
+# Legal/compliance risk phrases — triggers a Legal/Compliance priority flag
+LEGAL_RISK_PATTERNS = [
+    (r'\b(voice\s+clon(e|ing)|biometric|deepfake)\b', 'biometric/voice cloning — check right of publicity and biometric data law'),
+    (r'\b(gdpr|ccpa|hipaa|coppa|bipa|pii|personal\s+data)\b', 'data privacy regulation'),
+    (r'\b(right\s+of\s+publicity|likeness|impersonat(e|ion))\b', 'right of publicity'),
+    (r'\b(payment|billing|pci|stripe|financial\s+data)\b', 'payment/financial data handling'),
+    (r'\b(minor|child|under\s+13|under\s+18|parental\s+consent)\b', 'child safety regulation (COPPA/KOSA)'),
+    (r'\b(user\s+generated\s+content|ugc|copyright|dmca|takedown)\b', 'copyright/DMCA exposure'),
+]
+
 
 def extract_sections(text: str) -> dict:
     """Split text into labeled sections based on heading patterns."""
@@ -277,6 +287,25 @@ def find_assumptions(text: str) -> list:
     return findings
 
 
+def find_legal_risks(text: str) -> list:
+    """Find legal and compliance risk indicators."""
+    findings = []
+    lines = text.split('\n')
+
+    for i, line in enumerate(lines, 1):
+        for pattern, risk_type in LEGAL_RISK_PATTERNS:
+            if re.search(pattern, line, re.IGNORECASE):
+                match = re.search(pattern, line, re.IGNORECASE)
+                findings.append({
+                    'line': i,
+                    'text': line.strip(),
+                    'phrase': match.group(0) if match else '',
+                    'risk_type': risk_type,
+                })
+
+    return findings
+
+
 def find_pronouns_without_referent(text: str) -> list:
     """Find high-risk pronoun usage that may be ambiguous."""
     findings = []
@@ -334,13 +363,77 @@ def check_completeness(sections: dict, acs: list) -> dict:
     return results
 
 
+def derive_priority_actions(completeness: dict, vague: list, scope_risks: list,
+                             assumptions: list, legal_risks: list) -> list:
+    """
+    Derive up to 3 labeled priority actions ranked by severity.
+    Returns a list of (category_label, description) tuples.
+    """
+    priorities = []
+
+    # Legal/Compliance — highest severity, always surfaces first if present
+    if legal_risks:
+        unique_risk_types = list(dict.fromkeys(r['risk_type'] for r in legal_risks))
+        priorities.append((
+            'Legal / Compliance',
+            f"{len(legal_risks)} legal/compliance risk indicator(s) detected "
+            f"({'; '.join(unique_risk_types[:2])}). Resolve with legal counsel before "
+            f"any related sprint begins."
+        ))
+
+    # Structural — zero ACs or multiple critical missing fields
+    missing_fields = [v['name'] for k, v in completeness.items()
+                      if isinstance(v, dict) and v.get('status') == 'MISSING']
+    ac_count = completeness.get('ac_count', 0)
+
+    if ac_count == 0 and missing_fields:
+        priorities.append((
+            'Structural',
+            f"Zero acceptance criteria detected and {len(missing_fields)} required "
+            f"field(s) missing ({', '.join(missing_fields[:3])}{'...' if len(missing_fields) > 3 else ''}). "
+            f"The spec is not buildable as written — add ACs before sprint planning."
+        ))
+    elif ac_count == 0:
+        priorities.append((
+            'Structural',
+            "Zero acceptance criteria detected. QA cannot write a single test and "
+            "engineering cannot know when any feature is done."
+        ))
+    elif missing_fields:
+        critical = [f for f in missing_fields if f in
+                    ('Problem statement', 'Acceptance criteria', 'Success metrics')]
+        if critical:
+            priorities.append((
+                'Structural',
+                f"Critical field(s) missing: {', '.join(critical)}. "
+                f"Engineering will make unbounded assumptions without these."
+            ))
+
+    # Sprint Risk — scope risks or high assumption count
+    if scope_risks and len(priorities) < 3:
+        priorities.append((
+            'Sprint Risk',
+            f"{len(scope_risks)} scope creep risk phrase(s) and "
+            f"{len(assumptions)} implicit assumption indicator(s) detected. "
+            f"These will cause mid-sprint scope debates without bounded rewrites."
+        ))
+    elif vague and len(priorities) < 3:
+        priorities.append((
+            'Sprint Risk',
+            f"{len(vague)} vague/untestable language instance(s) detected. "
+            f"QA will be unable to verify these requirements without measurable rewrites."
+        ))
+
+    return priorities[:3]
+
+
 # ---------------------------------------------------------------------------
 # Output formatters
 # ---------------------------------------------------------------------------
 
 def format_text_output(filepath: str, sections: dict, acs: list,
                        completeness: dict, vague: list, scope_risks: list,
-                       assumptions: list) -> str:
+                       assumptions: list, legal_risks: list) -> str:
     """Format a human-readable audit prep report."""
     lines = []
     lines.append(f"SPEC PARSER OUTPUT")
@@ -357,6 +450,15 @@ def format_text_output(filepath: str, sections: dict, acs: list,
     lines.append(f"  Sections found ({len(present)}): {', '.join(present) if present else 'none'}")
     lines.append(f"  Sections missing ({len(missing)}): {', '.join(missing) if missing else 'none'}")
     lines.append(f"  Acceptance criteria items detected: {completeness.get('ac_count', 0)}")
+
+    # Legal risks
+    lines.append(f"\n## LEGAL / COMPLIANCE RISK INDICATORS ({len(legal_risks)} found)")
+    if legal_risks:
+        for item in legal_risks[:10]:
+            lines.append(f"  Line {item['line']}: [{item['risk_type']}]")
+            lines.append(f"    \"{item['text'][:100]}\"")
+    else:
+        lines.append("  None detected.")
 
     # Vague language
     lines.append(f"\n## VAGUE LANGUAGE INSTANCES ({len(vague)} found)")
@@ -393,6 +495,15 @@ def format_text_output(filepath: str, sections: dict, acs: list,
     else:
         lines.append("  No structured ACs detected. May need manual extraction.")
 
+    # Priority actions
+    priorities = derive_priority_actions(completeness, vague, scope_risks, assumptions, legal_risks)
+    lines.append(f"\n## RECOMMENDED NEXT ACTIONS (ranked by severity)")
+    if priorities:
+        for i, (label, desc) in enumerate(priorities, 1):
+            lines.append(f"  {i}. [{label}]: {desc}")
+    else:
+        lines.append("  No critical actions identified. Proceed to full audit.")
+
     lines.append(f"\n{'=' * 60}")
     lines.append("Parsing complete. Pass this output to the spec auditor for full analysis.")
 
@@ -401,8 +512,9 @@ def format_text_output(filepath: str, sections: dict, acs: list,
 
 def format_json_output(filepath: str, sections: dict, acs: list,
                        completeness: dict, vague: list, scope_risks: list,
-                       assumptions: list) -> str:
+                       assumptions: list, legal_risks: list) -> str:
     """Format as JSON for machine processing."""
+    priorities = derive_priority_actions(completeness, vague, scope_risks, assumptions, legal_risks)
     output = {
         'file': filepath,
         'sections_detected': {k: v for k, v in sections.items() if k != 'preamble'},
@@ -411,6 +523,11 @@ def format_json_output(filepath: str, sections: dict, acs: list,
         'vague_language_instances': vague,
         'scope_creep_risks': scope_risks,
         'assumption_indicators': assumptions,
+        'legal_risk_indicators': legal_risks,
+        'recommended_next_actions': [
+            {'rank': i + 1, 'category': label, 'description': desc}
+            for i, (label, desc) in enumerate(priorities)
+        ],
         'summary': {
             'sections_present': len([v for k, v in completeness.items()
                                      if isinstance(v, dict) and v.get('status') == 'PRESENT']),
@@ -420,23 +537,39 @@ def format_json_output(filepath: str, sections: dict, acs: list,
             'vague_instances': len(vague),
             'scope_risk_instances': len(scope_risks),
             'assumption_instances': len(assumptions),
+            'legal_risk_instances': len(legal_risks),
         }
     }
     return json.dumps(output, indent=2)
 
 
-def format_summary_output(completeness: dict, vague: list,
-                           scope_risks: list, assumptions: list) -> str:
-    """One-line-per-field summary for quick audit prep."""
+def format_summary_output(completeness: dict, vague: list, scope_risks: list,
+                           assumptions: list, legal_risks: list) -> str:
+    """Labeled, severity-ranked priority actions followed by field status."""
     lines = []
+
+    # Priority actions — ranked, labeled, most severe first
+    priorities = derive_priority_actions(completeness, vague, scope_risks, assumptions, legal_risks)
+    if priorities:
+        lines.append("RECOMMENDED NEXT ACTIONS (highest severity first):")
+        for i, (label, desc) in enumerate(priorities, 1):
+            lines.append(f"  {i}. [{label}]: {desc}")
+        lines.append("")
+
+    # Field presence
+    lines.append("FIELD STATUS:")
     for k, v in completeness.items():
         if isinstance(v, dict):
             status_icon = "✅" if v.get('status') == 'PRESENT' else "❌"
-            lines.append(f"{status_icon} {v['name']}: {v.get('status', 'UNKNOWN')}")
+            lines.append(f"  {status_icon} {v['name']}: {v.get('status', 'UNKNOWN')}")
 
-    lines.append(f"⚠️  Vague language instances: {len(vague)}")
-    lines.append(f"⚠️  Scope creep risk phrases: {len(scope_risks)}")
-    lines.append(f"⚠️  Assumption indicators: {len(assumptions)}")
+    lines.append("")
+    lines.append("SIGNAL COUNTS:")
+    lines.append(f"  ⚖️  Legal/compliance risk indicators: {len(legal_risks)}")
+    lines.append(f"  ⚠️  Vague language instances: {len(vague)}")
+    lines.append(f"  ⚠️  Scope creep risk phrases: {len(scope_risks)}")
+    lines.append(f"  ⚠️  Assumption indicators: {len(assumptions)}")
+
     return '\n'.join(lines)
 
 
@@ -465,15 +598,19 @@ def main():
     vague = find_vague_language(text)
     scope_risks = find_scope_risks(text)
     assumptions = find_assumptions(text)
+    legal_risks = find_legal_risks(text)
     completeness = check_completeness(sections, acs)
 
     # Output
     if args.format == 'json':
-        print(format_json_output(args.filepath, sections, acs, completeness, vague, scope_risks, assumptions))
+        print(format_json_output(args.filepath, sections, acs, completeness,
+                                 vague, scope_risks, assumptions, legal_risks))
     elif args.format == 'summary':
-        print(format_summary_output(completeness, vague, scope_risks, assumptions))
+        print(format_summary_output(completeness, vague, scope_risks,
+                                    assumptions, legal_risks))
     else:
-        print(format_text_output(args.filepath, sections, acs, completeness, vague, scope_risks, assumptions))
+        print(format_text_output(args.filepath, sections, acs, completeness,
+                                 vague, scope_risks, assumptions, legal_risks))
 
 
 if __name__ == '__main__':

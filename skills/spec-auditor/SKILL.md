@@ -200,7 +200,20 @@ ALWAYS produce the audit report in this exact structure:
 - 🔵 Notes: [N]
 - Total findings: [N]
 
-*Recommended next action:* [One sentence — what the PM should do first]
+**Recommended next actions** (ranked by severity, highest first):
+
+1. **[Category — e.g. Legal / Compliance / Structural / Sprint Risk / Scope]:** [One sentence describing the most severe action required and why it blocks everything else.]
+2. **[Category]:** [One sentence describing the second priority action.]
+3. **[Category]:** [One sentence describing the third priority action.]
+
+Category labels to use, in descending severity order:
+- **Legal / Compliance** — Regulatory or legal exposure that must be resolved before any related sprint begins (e.g. biometric data, right of publicity, deepfake law, GDPR consent).
+- **Structural** — A foundational gap that makes the spec unbuildable as written (e.g. zero ACs, undefined MVP scope, no actor/role definition).
+- **Sprint Risk** — Issues that won't block sprint start but will cause mid-sprint derailment or rework (e.g. unspecified edge case behaviors, ambiguous technology choices).
+- **Scope** — Phrases or requirements that will silently expand during implementation without a bounded rewrite.
+- **Compliance** — Non-legal policy or platform requirements (e.g. API terms of service, platform rate limits, App Store guidelines).
+
+Only include categories that apply. If there are fewer than 3 meaningful priorities, list only those that exist — do not pad with low-severity notes.
 
 ---
 
